@@ -1,0 +1,19 @@
+kind: Deployment
+metadata:
+  name: python-test
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: python-test
+  template:
+    metadata:
+      labels:
+        app: python-test
+    spec:
+      containers:
+      - image: https://artefacts.lloydsbanking.cloud/#browse/browse:private-harprd_brgtst-python-staging:PyTest%2F1.0
+        name: python-test
+        ports:
+        - containerPort: 80
