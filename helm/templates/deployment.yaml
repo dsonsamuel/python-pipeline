@@ -14,7 +14,7 @@ spec:
         app: python-test
     spec:
       containers:
-      - image: https://artefacts.lloydsbanking.cloud/#browse/browse:private-harprd_brgtst-python-staging:PyTest%2F1.0
-        name: python-test
+      - name: python-test
+        image: artefacts.lloydsbanking.cloud/private-harprd_brgtst-python-staging/PyTest:1.0
         ports:
         - containerPort: 80
