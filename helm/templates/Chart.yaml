@@ -1,4 +1,5 @@
 apiVersion: v2
+kind: Deployment
 name: python-test
 description: A Helm chart for deploying cp-python-app on GKE
 
