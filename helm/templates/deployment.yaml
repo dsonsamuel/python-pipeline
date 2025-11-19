@@ -1,20 +1,88 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: python-test
+  name: ma-gemini
 spec:
   replicas: 3
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: python-test
+      app: ma-gemini
   template:
     metadata:
       labels:
-        app: python-test
+        app: ma-gemini
     spec:
+      securityContext:
+        fsGroup: 1
+        runAsNonRoot: true
+        runAsUser: 10002
+        supplementalGroups:
+          - 1337
+        seccompProfile:
+          type:  RuntimeDefault
       containers:
-      - name: python-test
-        image: artefacts.lloydsbanking.cloud/private-harprd_brgtst-python-staging/PyTest:1.0
-        ports:
-        - containerPort: 80
+        - image: europe-docker.pkg.dev/ssv-ddv-devops-registry-172/docker-release/btbt1/gemcr/al11294/images/ma_gemini:1.0
+          name: ma-gemini
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            periodSeconds: 20
+            timeoutSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+          env:
+            - name: PROJECT
+              value: "wrk-dev-wrk01-svp-3f2f1d"
+            - name: LOCATION
+              value: "europe-west2"
+            - name: LOGGING_SERVICE_HOST
+              value: "logging-app.ns-700d5c.svc.cluster.local"
+            - name: LOGGING_SERVICE_POST
+              value: "80"
+            - name: OSSNAMESPACE
+              value: "ns-b0ba62"
+            - name: RGAINAMESPACE
+              value: "ns-b0ba62"
+            - name: LOGNAMESPACE
+              value: "ns-b0ba62"
+            - name: POD_NAMESPACE
+              value: "ns-b0ba62"
+            - name: AVENINAMESPACE
+              value: "ns-b0ba62"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 900m
+              memory: 1Gi
+      nodeSelector:
+          node_pool: ew2-msv-dev-caas01-svp01-knp01-user
+      tolerations:
+          - key: "user-dev"
+            operator: "Equal"
+            value: "dedicated"
+            effect: "NoSchedule"
